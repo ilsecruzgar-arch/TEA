@@ -1,6 +1,6 @@
 module tea_encrypt #(
   parameter N = 16,
-  parameter ROUNDS = 32
+  parameter NUM_CYCLES = 32
 )(
   input clk,
   input rst,
@@ -17,7 +17,7 @@ module tea_encrypt #(
   localparam [N-1:0] DELTA = GOLDEN_RATIO >> (64-N);
 
   // Contador de rondas
-  localparam COUNT_WIDTH = (ROUNDS > 1) ? $clog2(ROUNDS) : 1;
+  localparam COUNT_WIDTH = (NUM_CYCLES > 1) ? $clog2(NUM_CYCLES) : 1;
   reg [COUNT_WIDTH-1:0] round_count;
 
   // Estados de la FSM
@@ -85,7 +85,7 @@ module tea_encrypt #(
           R_in  <= R_final;
           sum <= next_sum;
 
-          if (round_count == ROUNDS-1) begin
+          if (round_count == NUM_CYCLES-1) begin
             ciphertext <= {L_final, R_final};
             state <= FINISH;
           end

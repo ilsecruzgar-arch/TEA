@@ -1,7 +1,7 @@
 
 module tea_decrypt #(
   parameter N = 16,
-  parameter ROUNDS = 32
+  parameter NUM_CYCLES = 32
 )(
   input clk,
   input rst,
@@ -19,7 +19,7 @@ module tea_decrypt #(
   localparam [N-1:0] DELTA = GOLDEN_RATIO >> (64-N);
 
   // Contador de rondas
-  localparam COUNT_WIDTH = (ROUNDS > 1) ? $clog2(ROUNDS) : 1;
+  localparam COUNT_WIDTH = (NUM_CYCLES > 1) ? $clog2(NUM_CYCLES) : 1;
   reg [COUNT_WIDTH-1:0] round_count;
 
   // Estados de la FSM
@@ -78,7 +78,7 @@ module tea_decrypt #(
             k3 <= key_reg[N-1:0];
 
             // Inicializacion de sum
-            sum <= DELTA * ROUNDS;
+            sum <= DELTA * NUM_CYCLES;
             round_count <= {COUNT_WIDTH{1'b0}};
             decrypt_busy <= 1'b1;
             state <= RUN;
@@ -90,7 +90,7 @@ module tea_decrypt #(
           R_in <= R_final;
           sum <= next_sum;
 
-          if (round_count == ROUNDS-1) begin
+          if (round_count == NUM_CYCLES-1) begin
             decrypted_text <= {L_final, R_final};
             state <= FINISH;
           end

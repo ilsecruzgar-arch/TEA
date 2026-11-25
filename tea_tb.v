@@ -4,7 +4,7 @@
 module tea_tb;
 
   parameter N = 16;
-  parameter ROUNDS = 32;
+  parameter NUM_CYCLES = 32;
   parameter CLK_PERIOD = 20;
 
   // Entradas
@@ -34,7 +34,7 @@ module tea_tb;
   // Instancia del cifrador
   tea_encrypt #(
     .N(N),
-    .ROUNDS(ROUNDS)
+    .NUM_CYCLES(NUM_CYCLES)
   ) uut_encrypt (
     .clk(clk),
     .rst(rst),
@@ -49,7 +49,7 @@ module tea_tb;
   // Instancia del descifrador
   tea_decrypt #(
     .N(N),
-    .ROUNDS(ROUNDS)
+    .NUM_CYCLES(NUM_CYCLES)
   ) uut_decrypt (
     .clk(clk),
     .rst(rst),
@@ -85,7 +85,7 @@ module tea_tb;
 
       // Esperar finalizacion del cifrado
       cycles = 0;
-      while (!encrypt_done && cycles < ROUNDS+5) begin
+      while (!encrypt_done && cycles < NUM_CYCLES+5) begin
         @(negedge clk);
         cycles = cycles + 1;
       end
@@ -112,7 +112,7 @@ module tea_tb;
 
       // Esperar finalizacion del descifrado
       cycles = 0;
-      while (!decrypt_done && cycles < ROUNDS+5) begin
+      while (!decrypt_done && cycles < NUM_CYCLES+5) begin
         @(negedge clk);
         cycles = cycles + 1;
       end
@@ -164,7 +164,7 @@ module tea_tb;
 
     $display("================================");
     $display("TEA ENCRYPT / DECRYPT TESTBENCH");
-    $display("N = %0d, ROUNDS = %0d", N, ROUNDS);
+    $display("N = %0d, NUM_CYCLES = %0d", N, NUM_CYCLES);
     $display("================================");
 
     // T1: ceros
