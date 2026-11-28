@@ -125,7 +125,6 @@ module fsm_controller #(
     load_decrypted  = 1'b0;
     compare_enable  = 1'b0;
     system_busy     = 1'b0;
-    system_done     = 1'b0;
 
     case (state)
 
@@ -184,7 +183,7 @@ module fsm_controller #(
       end
 
       FINISH: begin
-        system_done = 1'b1;
+        system_busy = 1'b0;
       end
 
       default: begin
