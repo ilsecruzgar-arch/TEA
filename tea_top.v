@@ -99,19 +99,7 @@ module tea_top #(
   wire [STATE_WIDTH-1:0] state;
 
   // Error injection
-  reg error_enable_reg;
   wire [2*N-1:0] ciphertext_injected;
-
-  // Capture error configuration when
-  // decryption starts
-  always @(posedge clk or posedge rst) begin
-    if (rst)
-      error_enable_reg <= 1'b0;
-    else if (load_data)
-      error_enable_reg <= 1'b0;
-    else if (start_decrypt)
-      error_enable_reg <= error_enable;
-  end
 
   // Inject an arithmetic error
   assign ciphertext_injected = ciphertext_reg + {{(2*N-1){1'b0}}, error_enable};
@@ -170,6 +158,7 @@ module tea_top #(
     .encrypt_done(encrypt_done),
     .decrypt_busy(decrypt_busy),
     .decrypt_done(decrypt_done),
+    .compare_done(compare_done),
     .start_encrypt(start_encrypt),
     .start_decrypt(start_decrypt),
     .load_data(load_data),
@@ -241,7 +230,6 @@ module tea_top #(
     .key_reg(key_reg),
     .ciphertext_reg(ciphertext_reg),
     .decrypted_reg(decrypted_reg),
-    .compare_result(compare_result),
     .data_ready(data_ready),
     .system_busy(system_busy),
     .encrypt_busy(encrypt_busy),

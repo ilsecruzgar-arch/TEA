@@ -22,7 +22,6 @@ module display_controller #(
     input wire [4*N-1:0] key_reg,
     input wire [2*N-1:0] ciphertext_reg,
     input wire [2*N-1:0] decrypted_reg,
-    input wire [2*N-1:0] compare_result,
     // System status
     input wire data_ready,
     input wire system_busy,
@@ -99,7 +98,7 @@ module display_controller #(
             end
 
             FINISH: begin
-                selected_data = compare_result;
+                selected_data = decrypted_reg;
             end
 
             default: begin
