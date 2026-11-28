@@ -5,7 +5,7 @@
 // into internal registers.
 ///////////////////////////////////////////////////////////////
 module data_registers #(
-    parameter N = 32,
+    parameter N = 16,
     parameter DATA_WIDTH = 8)
     (
     input wire clk,

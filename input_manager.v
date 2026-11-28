@@ -7,51 +7,42 @@
 // loading process is completed.
 //
 ///////////////////////////////////////////////////////////////
+
 module input_manager #(
-    parameter N = 32,
-    parameter DATA_WIDTH = 8)
-    (
+    parameter N = 16)(
     input  wire clk,
     input  wire rst_n,
-    input  wire [DATA_WIDTH-1:0] data,
     input  wire data_or_key,
     input  wire add_byte,
     input  wire load_enable,
+    input  wire [2*N-1:0] plaintext_in,
+    input  wire [4*N-1:0] key_in,
 
     output reg [2*N-1:0] plaintext,
     output reg [4*N-1:0] key,
     output wire data_ready
 );
 
-localparam DATA_BYTES = (2*N)/DATA_WIDTH;
-localparam KEY_BYTES  = (4*N)/DATA_WIDTH;
-localparam DATA_COUNT_WIDTH = $clog2(DATA_BYTES+1);
-localparam KEY_COUNT_WIDTH  = $clog2(KEY_BYTES+1);
+reg plaintext_loaded;
+reg key_loaded;
 
-reg [DATA_COUNT_WIDTH-1:0] data_count;
-reg [KEY_COUNT_WIDTH-1:0] key_count;
-
-assign data_ready = (data_count == DATA_BYTES) &&(key_count == KEY_BYTES);
+assign data_ready = plaintext_loaded && key_loaded;
 
 always @(posedge clk) begin
     if(!rst_n) begin
-        data_count <= 0;
-        key_count <= 0;
         plaintext <= {2*N{1'b0}};
         key <= {4*N{1'b0}};
-    end 
+        plaintext_loaded <= 1'b0;
+        key_loaded <= 1'b0;
+    end
     else if (load_enable && add_byte) begin
-        //low state is for data, high state is for key
-        if (data_or_key == 1'b0) begin // Load data into plaintext
-            if (data_count < DATA_BYTES) begin
-                plaintext <= {plaintext[2*N-DATA_WIDTH-1:0], data};
-                data_count <= data_count + 1'b1; 
-                end 
+        if (data_or_key == 1'b0) begin
+            plaintext <= plaintext_in;
+            plaintext_loaded <= 1'b1;
         end
-        else begin if (key_count < KEY_BYTES) begin // Load data into key
-            key <= {key[4*N-DATA_WIDTH-1:0], data};
-            key_count <= key_count + 1'b1;
-            end
+        else begin
+            key <= key_in;
+            key_loaded <= 1'b1;
         end
     end
 end

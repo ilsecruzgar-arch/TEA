@@ -5,7 +5,7 @@
 // data and reports the comparison result.
 ///////////////////////////////////////////////////////////////
 module comparator #(
-    parameter N = 32,
+    parameter N = 16,
     parameter DATA_WIDTH = 8)
     (
     input wire clk,
