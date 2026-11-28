@@ -2,7 +2,9 @@
 module tea_top #(
   parameter N = 16,
   parameter ROUNDS = 32,
-  parameter STATE_WIDTH = 4
+  parameter STATE_WIDTH = 4,
+  parameter PLAINTEXT_ADDR_WIDTH = 5,
+  parameter KEY_ADDR_WIDTH = 4
 )(
   input MAX10_CLK1_50,
   input [9:0] SW,
@@ -35,8 +37,8 @@ module tea_top #(
   // User interface
   wire next_state_button;
   wire error_enable;
-  wire [2*N-1:0] plaintext_addr;
-  wire [4*N-1:0] key_addr;
+  wire [PLAINTEXT_ADDR_WIDTH-1:0] plaintext_addr;
+  wire [KEY_ADDR_WIDTH-1:0] key_addr;
   reg [9:0] sw_sync_1;
   reg [9:0] sw_sync_2;
 
@@ -123,8 +125,8 @@ module tea_top #(
   // ROM Memory is instantiated internally
   input_manager #(
     .N(N),
-    .PLAINTEXT_ADDR_WIDTH(2*N),
-    .KEY_ADDR_WIDTH(4*N)
+    .PLAINTEXT_ADDR_WIDTH(PLAINTEXT_ADDR_WIDTH),
+    .KEY_ADDR_WIDTH(KEY_ADDR_WIDTH)
   ) u_input_manager (
     .clk(clk),
     .rst(rst),

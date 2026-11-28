@@ -1,7 +1,7 @@
 module ReadOnlyMemory#(
 	parameter PLAINTEXT_WIDTH = 32, 
 	parameter KEY_WIDTH = 64,
-	parameter PLAINTEXT_ADDR_WIDTH = 4, 
+	parameter PLAINTEXT_ADDR_WIDTH = 5, 
 	parameter KEY_ADDR_WIDTH = 4
 	)(
 // inputs
