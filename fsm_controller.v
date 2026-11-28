@@ -10,6 +10,7 @@ module fsm_controller #(
   input encrypt_done,       
   input decrypt_busy,                   // TEA Decrypt
   input decrypt_done,       
+  input compare_done,
   output reg start_encrypt,             // TEA control signals
   output reg start_decrypt,       
   output reg load_data,                 // Data registers control
@@ -54,7 +55,8 @@ module fsm_controller #(
       end
 
       LOAD_DATA: begin
-        next_state = READY_ENCRYPT;
+        if (data_ready)
+          next_state = READY_ENCRYPT;
       end
 
       READY_ENCRYPT: begin
@@ -99,12 +101,13 @@ module fsm_controller #(
       end
 
       COMPARE: begin
+      if (compare_done)
         next_state = FINISH;
       end
 
       FINISH: begin
-        if (!data_ready && next_state_button)
-          next_state = IDLE;
+      if (next_state_button)
+        next_state = IDLE;
       end
 
       default: begin
@@ -133,7 +136,7 @@ module fsm_controller #(
       end
 
       LOAD_DATA: begin
-        load_data   = 1'b1;
+        load_data   = data_ready;
         system_busy = 1'b1;
       end
 
@@ -178,7 +181,7 @@ module fsm_controller #(
       end
 
       COMPARE: begin
-        compare_enable = 1'b1;
+        compare_enable = !compare_done;
         system_busy    = 1'b1;
       end
 

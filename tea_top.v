@@ -1,10 +1,10 @@
 
 module tea_top #(
   parameter N = 16,
-  parameter ROUNDS = 32,
+  parameter NUM_CYCLES = 32,
   parameter STATE_WIDTH = 4,
-  parameter PLAINTEXT_ADDR_WIDTH = 5,
-  parameter KEY_ADDR_WIDTH = 4
+  parameter PLAINTEXT_ADDR_WIDTH = 3,
+  parameter KEY_ADDR_WIDTH = 3
 )(
   input MAX10_CLK1_50,
   input [9:0] SW,
@@ -39,6 +39,7 @@ module tea_top #(
   wire error_enable;
   wire [PLAINTEXT_ADDR_WIDTH-1:0] plaintext_addr;
   wire [KEY_ADDR_WIDTH-1:0] key_addr;
+  wire [2:0] display_page;
   reg [9:0] sw_sync_1;
   reg [9:0] sw_sync_2;
 
@@ -52,10 +53,12 @@ module tea_top #(
       sw_sync_2 <= sw_sync_1;
     end
   end
+  
 
   assign error_enable   = sw_sync_2[0];
-  assign plaintext_addr = sw_sync_2[5:1];
-  assign key_addr       = sw_sync_2[9:6];
+  assign plaintext_addr = sw_sync_2[3:1];
+  assign key_addr       = sw_sync_2[6:4];
+  assign display_page   = sw_sync_2[9:7];
 
   // Input Manager signals
   wire [2*N-1:0] plaintext;
@@ -86,6 +89,7 @@ module tea_top #(
 
   // Comparator signals
   wire compare_enable;
+  wire compare_done;
   wire [2*N-1:0] compare_result;
   wire success_flag;
   wire error_flag;
@@ -133,11 +137,12 @@ module tea_top #(
     .plaintext_addr(plaintext_addr),
     .key_addr(key_addr),
     .load_data(load_data),
-    .system_busy(system_busy),
     .plaintext(plaintext),
     .key(key),
+    .plaintext_reg(plaintext_reg),
+    .key_reg(key_reg),
     .data_ready(data_ready)
-  );
+);
 
   // 3. Data Registers
   data_registers #(
@@ -145,15 +150,10 @@ module tea_top #(
   ) u_data_registers (
     .clk(clk),
     .rst(rst),
-    .load_data(load_data),
     .load_ciphertext(load_ciphertext),
     .load_decrypted(load_decrypted),
-    .plaintext(plaintext),
-    .key(key),
     .ciphertext(ciphertext),
     .decrypted_text(decrypted_text),
-    .plaintext_reg(plaintext_reg),
-    .key_reg(key_reg),
     .ciphertext_reg(ciphertext_reg),
     .decrypted_reg(decrypted_reg)
   );
@@ -183,7 +183,7 @@ module tea_top #(
   // 5. TEA Encrypt
   tea_encrypt #(
     .N(N),
-    .ROUNDS(ROUNDS)
+    .NUM_CYCLES(NUM_CYCLES)
   ) u_tea_encrypt (
     .clk(clk),
     .rst(rst),
@@ -198,7 +198,7 @@ module tea_top #(
   // 6. TEA Decrypt
   tea_decrypt #(
     .N(N),
-    .ROUNDS(ROUNDS)
+    .NUM_CYCLES(NUM_CYCLES)
   ) u_tea_decrypt (
     .clk(clk),
     .rst(rst),
@@ -217,11 +217,13 @@ module tea_top #(
     .clk(clk),
     .rst(rst),
     .compare_enable(compare_enable),
+    .clear_result(load_data),
     .plaintext_reg(plaintext_reg),
     .decrypted_reg(decrypted_reg),
     .compare_result(compare_result),
     .success_flag(success_flag),
-    .error_flag(error_flag)
+    .error_flag(error_flag),
+    .compare_done(compare_done)
   );
 
   // 8. Display Controller
@@ -232,16 +234,15 @@ module tea_top #(
     .clk(clk),
     .rst(rst),
     .state(state),
-    .data_ready(data_ready),
-    .error_enable(error_enable_reg),
+    .display_page(display_page),
     .plaintext(plaintext),
     .key(key),
     .plaintext_reg(plaintext_reg),
     .key_reg(key_reg),
     .ciphertext_reg(ciphertext_reg),
-    .ciphertext_injected(ciphertext_injected),
     .decrypted_reg(decrypted_reg),
     .compare_result(compare_result),
+    .data_ready(data_ready),
     .system_busy(system_busy),
     .encrypt_busy(encrypt_busy),
     .decrypt_busy(decrypt_busy),
